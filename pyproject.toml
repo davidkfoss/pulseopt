@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pulseopt"
+dynamic = ["version"]
+description = "PulseOpt: episodic adaptive control for optimizer dynamics (LR multiplier and gradient noise)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "David Kneringer Foss", email = "david.k.foss@gmail.com" }]
+requires-python = ">=3.11"
+keywords = ["deep learning", "optimizer", "learning rate", "bandit", "adaptive", "scheduler"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0",
+]
+
+[project.optional-dependencies]
+experiments = [
+    "torchvision>=0.22",
+    "transformers>=4.52",
+    "datasets>=3.6",
+    "matplotlib>=3.10.9",
+]
+dev = ["pytest>=8,<9"]
+
+[project.urls]
+Homepage = "https://github.com/davidkfoss/pulseopt"
+Repository = "https://github.com/davidkfoss/pulseopt"
+Issues = "https://github.com/davidkfoss/pulseopt/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "pulseopt.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pulseopt = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

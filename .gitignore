@@ -1,0 +1,50 @@
+# Virtual environments
+.venv/
+
+# Python bytecode and caches
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+.ipynb_checkpoints/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# LaTeX/build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.synctex.gz
+
+# Generated dataset contents
+data/*
+!data/.gitkeep
+
+# Generated experiment results
+results/*
+!results/.gitkeep
+!results/README.md
+
+# Local secrets
+.env
+.env.*
+
+# Hugging Face cache
+.hf_cache/

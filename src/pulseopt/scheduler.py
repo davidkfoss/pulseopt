@@ -77,7 +77,7 @@ class AEES:
         context_trend_window: int = 3,
         context_trend_epsilon: float = 1e-3,
         total_training_steps: int | None = None,
-        reward_instability_lambda: float = 0.1,
+        reward_instability_lambda: float = 0.0,
         reward_epsilon: float = 1e-8,
         reward_clip_min: float = -1.0,
         reward_clip_max: float = 1.0,
@@ -109,9 +109,11 @@ class AEES:
         if any(value <= 0.0 for value in lr_list):
             raise ValueError("lr_candidates values must all be positive.")
         if not noise_list:
-            raise ValueError("noise_candidates must contain at least one value.")
+            raise ValueError(
+                "noise_candidates must contain at least one value.")
         if any(value < 0.0 for value in noise_list):
-            raise ValueError("noise_candidates values must all be non-negative.")
+            raise ValueError(
+                "noise_candidates values must all be non-negative.")
         if episode_length < 1:
             raise ValueError("episode_length must be a positive integer.")
         if total_training_steps is not None and context_mode != "trend_phase":
@@ -209,7 +211,8 @@ class AEES:
         candidate = self._current_candidate
         assert candidate is not None
 
-        float_loss = float(loss.item()) if isinstance(loss, Tensor) else float(loss)
+        float_loss = float(loss.item()) if isinstance(
+            loss, Tensor) else float(loss)
         if not math.isfinite(float_loss):
             raise ValueError("loss passed to step_end() must be finite.")
 
@@ -327,7 +330,8 @@ class AEES:
             generator_device = "cuda" if device.type == "cuda" else "cpu"
             generator = torch.Generator(device=generator_device)
             if self._seed is not None:
-                generator.manual_seed(self._seed + group_index * 1009 + param_index)
+                generator.manual_seed(
+                    self._seed + group_index * 1009 + param_index)
             self._noise_generators[key] = generator
         return self._noise_generators[key]
 

@@ -1,8 +1,9 @@
 # Virtual environments
 .venv/
 
-# Python bytecode and caches
+# Python caches
 __pycache__/
+*.pyc
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -15,36 +16,14 @@ dist/
 build/
 *.egg-info/
 
-# Local editor and OS files
+# Local files
 .DS_Store
 .idea/
 .vscode/
-
-# Logs
-*.log
-
-# LaTeX/build artifacts
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.out
-*.toc
-*.synctex.gz
-
-# Generated dataset contents
-data/*
-!data/.gitkeep
-
-# Generated experiment results
-results/*
-!results/.gitkeep
-!results/README.md
-
-# Local secrets
 .env
 .env.*
 
-# Hugging Face cache
-.hf_cache/
+# Local outputs
+*.log
+data/
+results/

@@ -23,7 +23,6 @@ from torch.utils.data import DataLoader
 
 from pulseopt import AEES
 
-
 VALIDATION_FRACTION = 0.1
 VALIDATION_SPLIT_SEED = 42
 NUM_LABELS = 4
@@ -65,9 +64,7 @@ def build_dataloaders(
     padder = DataCollatorWithPadding(tokenizer=tokenizer, return_tensors="pt")
 
     def collate(features: list[dict]) -> dict[str, torch.Tensor]:
-        labels = torch.tensor(
-            [int(f["label"]) for f in features], dtype=torch.long
-        )
+        labels = torch.tensor([int(f["label"]) for f in features], dtype=torch.long)
         inputs = [{k: v for k, v in f.items() if k != "label"} for f in features]
         batch = padder(inputs)
         batch["labels"] = labels
@@ -159,12 +156,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--model-name", default="distilbert-base-uncased")
     parser.add_argument("--episode-length", type=int, default=100)
-    parser.add_argument(
-        "--lr-candidates", type=float, nargs="+", default=[0.5, 1.0, 2.0]
-    )
-    parser.add_argument(
-        "--noise-candidates", type=float, nargs="+", default=[0.0, 0.005]
-    )
+    parser.add_argument("--lr-candidates", type=float, nargs="+", default=[0.5, 1.0, 2.0])
+    parser.add_argument("--noise-candidates", type=float, nargs="+", default=[0.0, 0.005])
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--output", type=Path, default=Path("./agnews_aees.log"))
@@ -180,9 +173,7 @@ def main() -> None:
         args.model_name, args.batch_size, args.max_length, args.num_workers
     )
     model = build_model(args.model_name, device)
-    optimizer = torch.optim.AdamW(
-        model.parameters(), lr=args.lr, weight_decay=args.weight_decay
-    )
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     # AEES wraps the AdamW optimizer; it picks an LR multiplier and gradient-
     # noise std per episode using a per-axis bandit driven by log-loss reward.
@@ -201,8 +192,7 @@ def main() -> None:
         f"device={device} epochs={args.epochs} batch_size={args.batch_size} lr={args.lr}\n"
         f"lr_candidates={list(args.lr_candidates)} "
         f"noise_candidates={list(args.noise_candidates)}\n"
-        f"episode_length={args.episode_length} seed={args.seed}\n"
-        + "-" * 80
+        f"episode_length={args.episode_length} seed={args.seed}\n" + "-" * 80
     )
     print(header, flush=True)
     log_lines.append(header)

@@ -48,8 +48,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         self._noise_seed = noise_seed
         self._noise_generators: dict[str, torch.Generator] = {}
         self._last_update_norm: float | None = None
-        self._scheduled_base_lrs = [float(group["lr"])
-                                    for group in self.param_groups]
+        self._scheduled_base_lrs = [float(group["lr"]) for group in self.param_groups]
         self._scheduled_base_weight_decays = [
             float(group["weight_decay"]) for group in self.param_groups
         ]
@@ -86,13 +85,11 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         state["mode"] = deepcopy(state["candidate_config"])
         state["scheduled_base_lrs"] = list(self._scheduled_base_lrs)
         state["base_lrs"] = list(self._scheduled_base_lrs)
-        state["scheduled_base_weight_decays"] = list(
-            self._scheduled_base_weight_decays)
+        state["scheduled_base_weight_decays"] = list(self._scheduled_base_weight_decays)
         state["base_weight_decays"] = list(self._scheduled_base_weight_decays)
         state["noise_seed"] = self._noise_seed
         state["noise_generator_states"] = {
-            key: generator.get_state()
-            for key, generator in self._noise_generators.items()
+            key: generator.get_state() for key, generator in self._noise_generators.items()
         }
         state["last_update_norm"] = self._last_update_norm
         return state
@@ -137,8 +134,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         )
         self._scheduled_base_weight_decays = self._restore_base_list(
             scheduled_base_weight_decays,
-            current_values=[float(group["weight_decay"])
-                            for group in self.param_groups],
+            current_values=[float(group["weight_decay"]) for group in self.param_groups],
             field_name="scheduled_base_weight_decays",
         )
         self._restore_scheduled_base_hparams()
@@ -159,8 +155,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         raise TypeError("mode must be a CandidateConfig.")
 
     def _sync_scheduled_base_hparams_from_param_groups(self) -> None:
-        self._scheduled_base_lrs = [float(group["lr"])
-                                    for group in self.param_groups]
+        self._scheduled_base_lrs = [float(group["lr"]) for group in self.param_groups]
         self._scheduled_base_weight_decays = [
             float(group["weight_decay"]) for group in self.param_groups
         ]
@@ -226,7 +221,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
                 squared_norm += float(delta.pow(2).sum().item())
         if snapshot_index == 0:
             return None
-        return squared_norm ** 0.5
+        return squared_norm**0.5
 
     def _serialize_mode(self) -> dict[str, float | str]:
         return {
@@ -239,8 +234,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         return CandidateConfig(
             name=str(state["name"]),
             lr_multiplier=float(state["lr_multiplier"]),
-            noise_std=float(
-                state.get("noise_std", state.get("grad_noise_std", 0.0))),
+            noise_std=float(state.get("noise_std", state.get("grad_noise_std", 0.0))),
         )
 
     def _get_noise_generator(
@@ -253,8 +247,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         if key not in self._noise_generators:
             generator = self._make_generator(device)
             if self._noise_seed is not None:
-                generator.manual_seed(
-                    self._noise_seed + group_index * 1009 + param_index)
+                generator.manual_seed(self._noise_seed + group_index * 1009 + param_index)
             self._noise_generators[key] = generator
         return self._noise_generators[key]
 
@@ -271,9 +264,7 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         if stored_values is None:
             return list(current_values)
         if len(stored_values) != len(current_values):
-            raise ValueError(
-                f"{field_name} length does not match optimizer param_groups."
-            )
+            raise ValueError(f"{field_name} length does not match optimizer param_groups.")
         return [float(value) for value in stored_values]
 
 
@@ -317,9 +308,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
         self._noise_seed = noise_seed
         self._noise_generators: dict[str, torch.Generator] = {}
         self._last_update_norm: float | None = None
-        self._scheduled_base_lrs = [
-            float(group["lr"]) for group in self.param_groups
-        ]
+        self._scheduled_base_lrs = [float(group["lr"]) for group in self.param_groups]
         self._scheduled_base_weight_decays = [
             float(group["weight_decay"]) for group in self.param_groups
         ]
@@ -356,14 +345,11 @@ class AdaptiveModeSGD(torch.optim.SGD):
         state["mode"] = deepcopy(state["candidate_config"])
         state["scheduled_base_lrs"] = list(self._scheduled_base_lrs)
         state["base_lrs"] = list(self._scheduled_base_lrs)
-        state["scheduled_base_weight_decays"] = list(
-            self._scheduled_base_weight_decays
-        )
+        state["scheduled_base_weight_decays"] = list(self._scheduled_base_weight_decays)
         state["base_weight_decays"] = list(self._scheduled_base_weight_decays)
         state["noise_seed"] = self._noise_seed
         state["noise_generator_states"] = {
-            key: generator.get_state()
-            for key, generator in self._noise_generators.items()
+            key: generator.get_state() for key, generator in self._noise_generators.items()
         }
         state["last_update_norm"] = self._last_update_norm
         return state
@@ -408,9 +394,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
         )
         self._scheduled_base_weight_decays = self._restore_base_list(
             scheduled_base_weight_decays,
-            current_values=[
-                float(group["weight_decay"]) for group in self.param_groups
-            ],
+            current_values=[float(group["weight_decay"]) for group in self.param_groups],
             field_name="scheduled_base_weight_decays",
         )
         self._restore_scheduled_base_hparams()
@@ -431,9 +415,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
         raise TypeError("mode must be a CandidateConfig.")
 
     def _sync_scheduled_base_hparams_from_param_groups(self) -> None:
-        self._scheduled_base_lrs = [
-            float(group["lr"]) for group in self.param_groups
-        ]
+        self._scheduled_base_lrs = [float(group["lr"]) for group in self.param_groups]
         self._scheduled_base_weight_decays = [
             float(group["weight_decay"]) for group in self.param_groups
         ]
@@ -499,7 +481,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
                 squared_norm += float(delta.pow(2).sum().item())
         if snapshot_index == 0:
             return None
-        return squared_norm ** 0.5
+        return squared_norm**0.5
 
     def _serialize_mode(self) -> dict[str, float | str]:
         return {
@@ -512,8 +494,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
         return CandidateConfig(
             name=str(state["name"]),
             lr_multiplier=float(state["lr_multiplier"]),
-            noise_std=float(
-                state.get("noise_std", state.get("grad_noise_std", 0.0))),
+            noise_std=float(state.get("noise_std", state.get("grad_noise_std", 0.0))),
         )
 
     def _get_noise_generator(
@@ -526,8 +507,7 @@ class AdaptiveModeSGD(torch.optim.SGD):
         if key not in self._noise_generators:
             generator = self._make_generator(device)
             if self._noise_seed is not None:
-                generator.manual_seed(
-                    self._noise_seed + group_index * 1009 + param_index)
+                generator.manual_seed(self._noise_seed + group_index * 1009 + param_index)
             self._noise_generators[key] = generator
         return self._noise_generators[key]
 
@@ -544,7 +524,5 @@ class AdaptiveModeSGD(torch.optim.SGD):
         if stored_values is None:
             return list(current_values)
         if len(stored_values) != len(current_values):
-            raise ValueError(
-                f"{field_name} length does not match optimizer param_groups."
-            )
+            raise ValueError(f"{field_name} length does not match optimizer param_groups.")
         return [float(value) for value in stored_values]

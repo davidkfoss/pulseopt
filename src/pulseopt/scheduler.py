@@ -10,11 +10,11 @@ import torch
 from torch import Tensor
 
 from pulseopt.controller import (
+    TREND_CONTEXT_BUCKETS,
+    TREND_PHASE_CONTEXT_BUCKETS,
     BucketedContextualController,
     DiscountedUCBController,
     RandomController,
-    TREND_CONTEXT_BUCKETS,
-    TREND_PHASE_CONTEXT_BUCKETS,
 )
 from pulseopt.episode import StructuredEpisodeManager
 from pulseopt.reward import NormalizedLossImprovementReward
@@ -86,13 +86,11 @@ class AEES:
     ) -> None:
         if control_mode not in _VALID_CONTROL_MODES:
             raise ValueError(
-                f"control_mode must be one of {sorted(_VALID_CONTROL_MODES)}, "
-                f"got {control_mode!r}."
+                f"control_mode must be one of {sorted(_VALID_CONTROL_MODES)}, got {control_mode!r}."
             )
         if context_mode not in _VALID_CONTEXT_MODES:
             raise ValueError(
-                f"context_mode must be one of {sorted(_VALID_CONTEXT_MODES)}, "
-                f"got {context_mode!r}."
+                f"context_mode must be one of {sorted(_VALID_CONTEXT_MODES)}, got {context_mode!r}."
             )
         if structured_control_mode not in _VALID_STRUCTURED_CONTROL_MODES:
             raise ValueError(
@@ -109,11 +107,9 @@ class AEES:
         if any(value <= 0.0 for value in lr_list):
             raise ValueError("lr_candidates values must all be positive.")
         if not noise_list:
-            raise ValueError(
-                "noise_candidates must contain at least one value.")
+            raise ValueError("noise_candidates must contain at least one value.")
         if any(value < 0.0 for value in noise_list):
-            raise ValueError(
-                "noise_candidates values must all be non-negative.")
+            raise ValueError("noise_candidates values must all be non-negative.")
         if episode_length < 1:
             raise ValueError("episode_length must be a positive integer.")
         if total_training_steps is not None and context_mode != "trend_phase":
@@ -182,9 +178,7 @@ class AEES:
         for inspection or logging; the return value can be ignored.
         """
         if self._step_started:
-            raise RuntimeError(
-                "step_start() called twice without an intervening step_end()."
-            )
+            raise RuntimeError("step_start() called twice without an intervening step_end().")
         candidate = self._episode_manager.on_step_start(global_step)
         self._param_snapshots = self._capture_param_snapshots()
         self._current_candidate = candidate
@@ -205,20 +199,17 @@ class AEES:
             RuntimeError: if called without a preceding :meth:`step_start`.
         """
         if not self._step_started:
-            raise RuntimeError(
-                "step_end() called without a preceding step_start()."
-            )
+            raise RuntimeError("step_end() called without a preceding step_start().")
         candidate = self._current_candidate
         assert candidate is not None
 
-        float_loss = float(loss.item()) if isinstance(
-            loss, Tensor) else float(loss)
+        float_loss = float(loss.item()) if isinstance(loss, Tensor) else float(loss)
         if not math.isfinite(float_loss):
             raise ValueError("loss passed to step_end() must be finite.")
 
         base_lrs = [float(g["lr"]) for g in self._optimizer.param_groups]
 
-        for group, base_lr in zip(self._optimizer.param_groups, base_lrs):
+        for group, base_lr in zip(self._optimizer.param_groups, base_lrs, strict=True):
             group["lr"] = base_lr * candidate.lr_multiplier
 
         if candidate.noise_std > 0.0:
@@ -226,7 +217,7 @@ class AEES:
 
         self._optimizer.step()
 
-        for group, base_lr in zip(self._optimizer.param_groups, base_lrs):
+        for group, base_lr in zip(self._optimizer.param_groups, base_lrs, strict=True):
             group["lr"] = base_lr
 
         update_norm = self._compute_update_norm(self._param_snapshots)
@@ -246,9 +237,7 @@ class AEES:
         Call once after the training loop completes.
         """
         if self._step_started:
-            raise RuntimeError(
-                "finalize() called with an open step — call step_end() first."
-            )
+            raise RuntimeError("finalize() called with an open step — call step_end() first.")
         self._episode_manager.finalize()
 
     # ------------------------------------------------------------------
@@ -301,16 +290,14 @@ class AEES:
                 snapshot_index += 1
                 delta = param.detach() - prev
                 squared_norm += float(delta.pow(2).sum().item())
-        return squared_norm ** 0.5
+        return squared_norm**0.5
 
     def _apply_gradient_noise(self, noise_std: float) -> None:
         for group_index, group in enumerate(self._optimizer.param_groups):
             for param_index, param in enumerate(group["params"]):
                 if param.grad is None:
                     continue
-                generator = self._get_noise_generator(
-                    group_index, param_index, param.grad.device
-                )
+                generator = self._get_noise_generator(group_index, param_index, param.grad.device)
                 noise = torch.randn(
                     param.grad.shape,
                     generator=generator,
@@ -330,8 +317,7 @@ class AEES:
             generator_device = "cuda" if device.type == "cuda" else "cpu"
             generator = torch.Generator(device=generator_device)
             if self._seed is not None:
-                generator.manual_seed(
-                    self._seed + group_index * 1009 + param_index)
+                generator.manual_seed(self._seed + group_index * 1009 + param_index)
             self._noise_generators[key] = generator
         return self._noise_generators[key]
 
@@ -339,6 +325,7 @@ class AEES:
 # ------------------------------------------------------------------
 # Module-level helpers (not part of public API)
 # ------------------------------------------------------------------
+
 
 def _resolve_bucket_names(context_mode: str) -> list[str] | None:
     if context_mode == "trend":

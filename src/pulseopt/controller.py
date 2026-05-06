@@ -6,7 +6,6 @@ import math
 import random
 from typing import Protocol
 
-
 TREND_CONTEXT_BUCKETS = ["improving", "stable", "worsening"]
 TREND_PHASE_CONTEXT_BUCKETS = [
     "early_improving",
@@ -123,7 +122,9 @@ class DiscountedUCBController:
         """Return a debug-friendly snapshot of controller state."""
 
         mean_rewards = []
-        for count, reward_sum in zip(self._discounted_counts, self._discounted_reward_sums):
+        for count, reward_sum in zip(
+            self._discounted_counts, self._discounted_reward_sums, strict=True
+        ):
             divisor = count if count > self.eps else self.eps
             mean_rewards.append(reward_sum / divisor)
         return {

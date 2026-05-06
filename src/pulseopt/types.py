@@ -21,6 +21,7 @@ class CandidateConfig:
         if self.noise_std < 0.0:
             raise ValueError("noise_std must be non-negative.")
 
+
 @dataclass(frozen=True)
 class StructuredSelection:
     """Selected LR/noise pair for one structured-control episode."""

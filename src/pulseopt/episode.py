@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import math
+from dataclasses import dataclass, field
 
 from pulseopt.controller import BaseController
 from pulseopt.modes import build_generated_candidate_name
@@ -102,7 +102,9 @@ class StructuredEpisodeManager:
             raise ValueError("context_trend_window must be positive.")
         if context_trend_epsilon < 0.0:
             raise ValueError("context_trend_epsilon must be non-negative.")
-        if context_mode == "trend_phase" and (total_training_steps is None or total_training_steps <= 0):
+        if context_mode == "trend_phase" and (
+            total_training_steps is None or total_training_steps <= 0
+        ):
             raise ValueError("trend_phase context requires a positive total_training_steps.")
         if len(lr_candidates) == 1:
             if lr_controller is not None:
@@ -201,7 +203,9 @@ class StructuredEpisodeManager:
 
         if self._active_episode is None:
             raise RuntimeError("on_step_end() requires an active episode from on_step_start().")
-        self._update_active_episode(loss=loss, update_norm=update_norm, episode=self._active_episode)
+        self._update_active_episode(
+            loss=loss, update_norm=update_norm, episode=self._active_episode
+        )
         if self._active_episode.steps_completed >= self._episode_length:
             self._close_active_episode()
 
@@ -222,9 +226,16 @@ class StructuredEpisodeManager:
 
     def _close_active_episode(self) -> None:
         episode = self._active_episode
-        if episode is None or episode.last_step is None or episode.start_loss is None or episode.end_loss is None:
+        if (
+            episode is None
+            or episode.last_step is None
+            or episode.start_loss is None
+            or episode.end_loss is None
+        ):
             raise RuntimeError("Cannot close an episode without completed steps.")
-        combined_mode_id = episode.selection.lr_index * len(self._noise_candidates) + episode.selection.noise_index
+        combined_mode_id = (
+            episode.selection.lr_index * len(self._noise_candidates) + episode.selection.noise_index
+        )
         summary = self._build_episode_summary(
             episode_index=episode.episode_index,
             mode_id=combined_mode_id,
@@ -310,7 +321,9 @@ class StructuredEpisodeManager:
             context_phase=phase,
         )
 
-    def _resolve_context(self, global_step: int) -> tuple[str | None, str | None, str | None, str | None]:
+    def _resolve_context(
+        self, global_step: int
+    ) -> tuple[str | None, str | None, str | None, str | None]:
         if self._context_mode == "none":
             return None, None, None, None
         trend = self._resolve_context_trend()
@@ -370,7 +383,9 @@ class StructuredEpisodeManager:
     ) -> EpisodeSummary:
         ema_abs_loss_delta = 0.0
         if len(step_losses) > 1:
-            ema_abs_loss_delta = sum(abs(curr - prev) for prev, curr in zip(step_losses, step_losses[1:]))
+            ema_abs_loss_delta = sum(
+                abs(curr - prev) for prev, curr in zip(step_losses, step_losses[1:], strict=False)
+            )
             ema_abs_loss_delta /= len(step_losses) - 1
         ema_loss_start, ema_loss_end = _compute_episode_loss_ema(step_losses, self._ema_alpha)
         mean_update_norm = None
@@ -445,7 +460,6 @@ class StructuredEpisodeManager:
             raise TypeError(f"{controller_name}.select_mode() must return an integer arm id.")
         if not 0 <= index < size:
             raise ValueError(
-                f"{controller_name}.select_mode() returned arm id {index}, but valid ids are in [0, {size})."
+                f"{controller_name}.select_mode() returned arm id {index}, "
+                f"but valid ids are in [0, {size})."
             )
-
-

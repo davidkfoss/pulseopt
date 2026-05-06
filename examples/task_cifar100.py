@@ -36,28 +36,28 @@ def build_dataloaders(
 ) -> tuple[DataLoader, DataLoader]:
     from torchvision import datasets, transforms
 
-    train_tf = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=(0.5071, 0.4867, 0.4408),
-            std=(0.2675, 0.2565, 0.2761),
-        ),
-    ])
-    test_tf = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=(0.5071, 0.4867, 0.4408),
-            std=(0.2675, 0.2565, 0.2761),
-        ),
-    ])
-    train_set = datasets.CIFAR100(
-        root=str(data_dir), train=True, download=True, transform=train_tf
+    train_tf = transforms.Compose(
+        [
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=(0.5071, 0.4867, 0.4408),
+                std=(0.2675, 0.2565, 0.2761),
+            ),
+        ]
     )
-    test_set = datasets.CIFAR100(
-        root=str(data_dir), train=False, download=True, transform=test_tf
+    test_tf = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=(0.5071, 0.4867, 0.4408),
+                std=(0.2675, 0.2565, 0.2761),
+            ),
+        ]
     )
+    train_set = datasets.CIFAR100(root=str(data_dir), train=True, download=True, transform=train_tf)
+    test_set = datasets.CIFAR100(root=str(data_dir), train=False, download=True, transform=test_tf)
     pin_memory = torch.cuda.is_available()
     train_loader = DataLoader(
         train_set,
@@ -96,9 +96,7 @@ def build_optimizer(
     if name == "AdamW":
         return torch.optim.AdamW(parameters, lr=lr, weight_decay=weight_decay)
     if name == "SGD":
-        return torch.optim.SGD(
-            parameters, lr=lr, momentum=momentum, weight_decay=weight_decay
-        )
+        return torch.optim.SGD(parameters, lr=lr, momentum=momentum, weight_decay=weight_decay)
     raise ValueError(f"Unsupported optimizer: {name}")
 
 
@@ -158,12 +156,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--momentum", type=float, default=0.9)
     parser.add_argument("--optimizer", choices=["AdamW", "SGD"], default="AdamW")
     parser.add_argument("--episode-length", type=int, default=100)
-    parser.add_argument(
-        "--lr-candidates", type=float, nargs="+", default=[0.5, 1.0, 2.0]
-    )
-    parser.add_argument(
-        "--noise-candidates", type=float, nargs="+", default=[0.0, 0.005]
-    )
+    parser.add_argument("--lr-candidates", type=float, nargs="+", default=[0.5, 1.0, 2.0])
+    parser.add_argument("--noise-candidates", type=float, nargs="+", default=[0.0, 0.005])
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--data-dir", type=Path, default=Path("./data"))
     parser.add_argument("--num-workers", type=int, default=2)
@@ -176,9 +170,7 @@ def main() -> None:
     set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_loader, test_loader = build_dataloaders(
-        args.data_dir, args.batch_size, args.num_workers
-    )
+    train_loader, test_loader = build_dataloaders(args.data_dir, args.batch_size, args.num_workers)
     model = build_model(device)
     optimizer = build_optimizer(
         args.optimizer,
@@ -207,8 +199,7 @@ def main() -> None:
         f"device={device} epochs={args.epochs} batch_size={args.batch_size} lr={args.lr}\n"
         f"lr_candidates={list(args.lr_candidates)} "
         f"noise_candidates={list(args.noise_candidates)}\n"
-        f"episode_length={args.episode_length} seed={args.seed}\n"
-        + "-" * 80
+        f"episode_length={args.episode_length} seed={args.seed}\n" + "-" * 80
     )
     print(header, flush=True)
     log_lines.append(header)

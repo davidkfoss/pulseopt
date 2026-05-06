@@ -74,7 +74,7 @@ class TestAEESParameterUpdate:
         aees.step_end(loss)
         after = [p.detach().clone() for p in model.parameters()]
 
-        assert any(not torch.equal(b, a) for b, a in zip(before, after))
+        assert any(not torch.equal(b, a) for b, a in zip(before, after, strict=True))
 
     def test_lr_multiplier_is_transient(self):
         lr = 1e-3

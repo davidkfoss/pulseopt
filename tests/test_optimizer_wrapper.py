@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import torch
 
-from pulseopt.types import CandidateConfig
 from pulseopt.optimizer import AdaptiveModeAdamW
+from pulseopt.types import CandidateConfig
 
 
 def build_model(weight: float = 1.0) -> torch.nn.Linear:

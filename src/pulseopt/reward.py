@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import Protocol
 
 from pulseopt.types import EpisodeSummary
@@ -58,11 +58,9 @@ class NormalizedLossImprovementReward:
 
         self._validate_summary(summary)
         if summary.ema_loss_start + self.reward_epsilon <= 0.0:
-            raise ValueError(
-                "ema_loss_start + reward_epsilon must be positive for log reward.")
+            raise ValueError("ema_loss_start + reward_epsilon must be positive for log reward.")
         if summary.ema_loss_end + self.reward_epsilon <= 0.0:
-            raise ValueError(
-                "ema_loss_end + reward_epsilon must be positive for log reward.")
+            raise ValueError("ema_loss_end + reward_epsilon must be positive for log reward.")
         reward_base = math.log(summary.ema_loss_start + self.reward_epsilon) - math.log(
             summary.ema_loss_end + self.reward_epsilon
         )
@@ -70,9 +68,7 @@ class NormalizedLossImprovementReward:
         variance = sum(
             (step_loss - mean_step_loss) ** 2 for step_loss in summary.step_losses
         ) / len(summary.step_losses)
-        reward_instability = variance / (
-            mean_step_loss * mean_step_loss + self.reward_epsilon
-        )
+        reward_instability = variance / (mean_step_loss * mean_step_loss + self.reward_epsilon)
         reward_penalty = self.reward_instability_lambda * reward_instability
         reward_final_unclipped = reward_base - reward_penalty
         reward_final_clipped = min(
@@ -112,11 +108,9 @@ class NormalizedLossImprovementReward:
             if not math.isfinite(value):
                 raise ValueError(f"{name} must be finite.")
         if summary.steps <= 0:
-            raise ValueError(
-                "Episode summary must contain at least one completed step.")
+            raise ValueError("Episode summary must contain at least one completed step.")
         if not summary.step_losses:
             raise ValueError("Episode summary must contain raw step losses.")
         for step_loss in summary.step_losses:
             if not math.isfinite(step_loss):
-                raise ValueError(
-                    "step_losses must contain only finite values.")
+                raise ValueError("step_losses must contain only finite values.")

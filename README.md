@@ -95,45 +95,17 @@ python examples/task_cifar100.py --epochs 10 --output cifar100.log
 
 These are the recommended starting point if you want to see how AEES plugs into a normal training loop.
 
-## Thesis experiments
-
-The package is the library half of a thesis project. The thesis-facing experiment runners and orchestration helpers live in [`experiments/`](https://github.com/davidkfoss/pulseopt/tree/main/experiments) but are **not** part of the published wheel and **not** intended as user-facing examples. They wire the lower-level controllers, episode manager, and optimizer wrappers directly; carry full ablation flags such as label noise, FLOPs accounting, controller snapshots, baseline/adaptive/random toggles; and depend on `experiments/utils/`.
-
-Main experiment scripts:
-
-- [`experiments/task_cifar100.py`](https://github.com/davidkfoss/pulseopt/blob/main/experiments/task_cifar100.py)
-- [`experiments/task_sst2.py`](https://github.com/davidkfoss/pulseopt/blob/main/experiments/task_sst2.py)
-- [`experiments/task_agnews.py`](https://github.com/davidkfoss/pulseopt/blob/main/experiments/task_agnews.py)
-
-Key structured AEES flags exposed by the runners:
-
-- `--lr-candidates`, `--noise-candidates`
-- `--structured-control-mode {independent,conditional}`
-- `--context-mode {none,trend,trend_phase}`
-- `--context-trend-window`, `--context-trend-epsilon`
-- `--episode-length`
-
-Scheduler flags: `--lr-scheduler {none,cosine,linear,warmup_linear}`, `--scheduler-t-max`, `--warmup-epochs`.
-
-Reward flags: `--reward-epsilon`, `--reward-instability-lambda`, `--reward-clip-min`, `--reward-clip-max`.
-
-CIFAR-specific noise flags: `--label-noise-type {none,symmetric,asymmetric}`, `--label-noise-rate`.
-
-The structured path does not adapt weight decay. Single-candidate axes, such as `--lr-candidates 1.0` or `--noise-candidates 0.0`, are treated as fixed constants and skip controller creation. The CIFAR runner also exposes `--control-mode {baseline,adaptive,random}`; SST-2 and AG News use `--method {AdamW,AdaptiveScheduler,RandomScheduler}`.
-
 ## Repo layout
 
 - [`src/pulseopt/`](https://github.com/davidkfoss/pulseopt/tree/main/src/pulseopt) — published library: controllers, episode manager, reward, optimizer wrappers, and the `AEES` high-level API.
 - [`examples/`](https://github.com/davidkfoss/pulseopt/tree/main/examples) — short, self-contained PyPI-side demos using the public `AEES` API.
-- [`experiments/`](https://github.com/davidkfoss/pulseopt/tree/main/experiments) — thesis-facing task runners and orchestration helpers.
 - [`tests/`](https://github.com/davidkfoss/pulseopt/tree/main/tests) — regression and unit tests.
-- `data/`, `results/` — local datasets and outputs, gitignored.
 
 ## Development
 
 ```bash
 python3.11 -m venv .venv && source .venv/bin/activate
-pip install -e .[dev,experiments]
+pip install -e .[dev,examples]
 pytest
 ```
 

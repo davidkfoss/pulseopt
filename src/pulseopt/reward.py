@@ -36,7 +36,7 @@ class NormalizedLossImprovementReward:
     def __init__(
         self,
         reward_epsilon: float = 1e-8,
-        reward_instability_lambda: float = 0.1,
+        reward_instability_lambda: float = 0.0,
         reward_clip_min: float = -1.0,
         reward_clip_max: float = 1.0,
     ) -> None:
@@ -58,9 +58,11 @@ class NormalizedLossImprovementReward:
 
         self._validate_summary(summary)
         if summary.ema_loss_start + self.reward_epsilon <= 0.0:
-            raise ValueError("ema_loss_start + reward_epsilon must be positive for log reward.")
+            raise ValueError(
+                "ema_loss_start + reward_epsilon must be positive for log reward.")
         if summary.ema_loss_end + self.reward_epsilon <= 0.0:
-            raise ValueError("ema_loss_end + reward_epsilon must be positive for log reward.")
+            raise ValueError(
+                "ema_loss_end + reward_epsilon must be positive for log reward.")
         reward_base = math.log(summary.ema_loss_start + self.reward_epsilon) - math.log(
             summary.ema_loss_end + self.reward_epsilon
         )
@@ -110,9 +112,11 @@ class NormalizedLossImprovementReward:
             if not math.isfinite(value):
                 raise ValueError(f"{name} must be finite.")
         if summary.steps <= 0:
-            raise ValueError("Episode summary must contain at least one completed step.")
+            raise ValueError(
+                "Episode summary must contain at least one completed step.")
         if not summary.step_losses:
             raise ValueError("Episode summary must contain raw step losses.")
         for step_loss in summary.step_losses:
             if not math.isfinite(step_loss):
-                raise ValueError("step_losses must contain only finite values.")
+                raise ValueError(
+                    "step_losses must contain only finite values.")

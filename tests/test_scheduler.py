@@ -150,6 +150,7 @@ class TestAEESContextModes:
         logs = aees.get_logs()
         assert "context_buckets" in logs
 
+
 class TestAEESConditionalMode:
     def test_conditional_structured_control(self):
         model, optimizer = _make_model_and_optimizer()
@@ -223,6 +224,7 @@ class TestAEESGuards:
         with pytest.raises(ValueError, match="context_mode"):
             AEES(optimizer, lr_candidates=[1.0], noise_candidates=[0.0], context_mode="invalid")
 
+
 class TestAEESInputValidation:
     @pytest.mark.parametrize(
         "lr_candidates",
@@ -251,6 +253,7 @@ class TestAEESInputValidation:
                 noise_candidates=[0.0],
                 episode_length=0,
             )
+
 
 class TestAEESCurrentCandidate:
     def test_current_candidate_lifecycle(self):

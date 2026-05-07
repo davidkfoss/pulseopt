@@ -55,7 +55,7 @@ The wrapper owns `optimizer.step()` and `lr_scheduler.step()`; you keep `zero_gr
 
 - **Episode**: a fixed-length window of training steps with one frozen candidate: LR multiplier and/or noise std.
 - **Reward**: log-EMA-loss improvement over the episode, minus an optional instability penalty proportional to within-episode loss variance, clipped to `[-1, 1]`.
-- **Controller**: discounted-UCB by default; an optional bucketed-contextual variant uses a coarse loss-trend and optional training-phase bucket to share information across similar regimes.
+- **Controller**: discounted-UCB by default; an optional bucketed-contextual variant uses a coarse loss-trend bucket to share information across similar regimes.
 
 Axes with a single candidate are treated as fixed constants and get no controller. Passing `lr_candidates=[1.0]` keeps the LR multiplier disabled, and `noise_candidates=[0.0]` keeps gradient noise off.
 
@@ -68,7 +68,7 @@ Axes with a single candidate are treated as fixed constants and get no controlle
 | `episode_length`            | Steps per episode; reward is computed at episode end.                                               |
 | `lr_scheduler`              | Optional `torch.optim.lr_scheduler.*` instance; `step()` is called for you.                         |
 | `structured_control_mode`   | `"independent"` (default) or `"conditional"` (one noise controller per LR arm).                     |
-| `context_mode`              | `"none"` (default), `"trend"`, or `"trend_phase"`; `"trend_phase"` requires `total_training_steps`. |
+| `context_mode`              | `"none"` (default) or `"trend"`.                                                                    |
 | `reward_instability_lambda` | Weight on the variance penalty in the reward.                                                       |
 | `seed`                      | Seeds controllers and gradient-noise generators.                                                    |
 

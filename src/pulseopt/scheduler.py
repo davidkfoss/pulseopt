@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-import warnings
 from typing import Any
 
 import torch
@@ -11,7 +10,6 @@ from torch import Tensor
 
 from pulseopt.controller import (
     TREND_CONTEXT_BUCKETS,
-    TREND_PHASE_CONTEXT_BUCKETS,
     BucketedContextualController,
     DiscountedUCBController,
     RandomController,
@@ -21,7 +19,7 @@ from pulseopt.reward import NormalizedLossImprovementReward
 from pulseopt.types import CandidateConfig
 
 _VALID_CONTROL_MODES = frozenset({"adaptive", "random"})
-_VALID_CONTEXT_MODES = frozenset({"none", "trend", "trend_phase"})
+_VALID_CONTEXT_MODES = frozenset({"none", "trend"})
 _VALID_STRUCTURED_CONTROL_MODES = frozenset({"independent", "conditional"})
 
 
@@ -76,7 +74,6 @@ class AEES:
         context_mode: str = "none",
         context_trend_window: int = 3,
         context_trend_epsilon: float = 1e-3,
-        total_training_steps: int | None = None,
         reward_instability_lambda: float = 0.0,
         reward_epsilon: float = 1e-8,
         reward_clip_min: float = -1.0,
@@ -112,12 +109,6 @@ class AEES:
             raise ValueError("noise_candidates values must all be non-negative.")
         if episode_length < 1:
             raise ValueError("episode_length must be a positive integer.")
-        if total_training_steps is not None and context_mode != "trend_phase":
-            warnings.warn(
-                "total_training_steps is only used when context_mode='trend_phase'; "
-                "the value is ignored for the current context_mode.",
-                stacklevel=2,
-            )
 
         reward_fn = NormalizedLossImprovementReward(
             reward_epsilon=reward_epsilon,
@@ -126,7 +117,7 @@ class AEES:
             reward_clip_max=reward_clip_max,
         )
 
-        bucket_names = _resolve_bucket_names(context_mode)
+        bucket_names = list(TREND_CONTEXT_BUCKETS) if context_mode == "trend" else None
 
         lr_controller = _build_controller(
             n_arms=len(lr_list),
@@ -152,7 +143,6 @@ class AEES:
             episode_length=episode_length,
             structured_control_mode=structured_control_mode,
             context_mode=context_mode,
-            total_training_steps=total_training_steps if context_mode == "trend_phase" else None,
             context_trend_window=context_trend_window,
             context_trend_epsilon=context_trend_epsilon,
             ema_alpha=ema_alpha,
@@ -325,14 +315,6 @@ class AEES:
 # ------------------------------------------------------------------
 # Module-level helpers (not part of public API)
 # ------------------------------------------------------------------
-
-
-def _resolve_bucket_names(context_mode: str) -> list[str] | None:
-    if context_mode == "trend":
-        return list(TREND_CONTEXT_BUCKETS)
-    if context_mode == "trend_phase":
-        return list(TREND_PHASE_CONTEXT_BUCKETS)
-    return None
 
 
 def _build_controller(

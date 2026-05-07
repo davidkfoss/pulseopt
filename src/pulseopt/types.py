@@ -31,10 +31,7 @@ class StructuredSelection:
     lr_value: float
     noise_value: float
     combined_name: str
-    context_bucket_id: str | None = None
-    context_bucket_name: str | None = None
-    context_trend: str | None = None
-    context_phase: str | None = None
+    context_bucket: str | None = None
 
 
 @dataclass(frozen=True)

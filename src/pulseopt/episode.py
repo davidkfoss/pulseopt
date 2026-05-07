@@ -82,7 +82,6 @@ class StructuredEpisodeManager:
         episode_length: int,
         structured_control_mode: str = "independent",
         context_mode: str = "none",
-        total_training_steps: int | None = None,
         context_trend_window: int = 3,
         context_trend_epsilon: float = 1e-3,
         ema_alpha: float = 0.1,
@@ -96,16 +95,12 @@ class StructuredEpisodeManager:
             raise ValueError("episode_length must be a positive integer.")
         if structured_control_mode not in {"independent", "conditional"}:
             raise ValueError("structured_control_mode must be 'independent' or 'conditional'.")
-        if context_mode not in {"none", "trend", "trend_phase"}:
-            raise ValueError("context_mode must be 'none', 'trend', or 'trend_phase'.")
+        if context_mode not in {"none", "trend"}:
+            raise ValueError("context_mode must be 'none' or 'trend'.")
         if context_trend_window <= 0:
             raise ValueError("context_trend_window must be positive.")
         if context_trend_epsilon < 0.0:
             raise ValueError("context_trend_epsilon must be non-negative.")
-        if context_mode == "trend_phase" and (
-            total_training_steps is None or total_training_steps <= 0
-        ):
-            raise ValueError("trend_phase context requires a positive total_training_steps.")
         if len(lr_candidates) == 1:
             if lr_controller is not None:
                 raise TypeError("Single-candidate LR axes must not create a controller.")
@@ -142,7 +137,6 @@ class StructuredEpisodeManager:
         self._episode_length = episode_length
         self._structured_control_mode = structured_control_mode
         self._context_mode = context_mode
-        self._total_training_steps = total_training_steps
         self._context_trend_window = context_trend_window
         self._context_trend_epsilon = context_trend_epsilon
         self._ema_alpha = ema_alpha
@@ -173,10 +167,7 @@ class StructuredEpisodeManager:
             "mean_update_norms": [],
         }
         if context_mode != "none":
-            self._logs["context_bucket_ids"] = []
-            self._logs["context_bucket_names"] = []
-            self._logs["context_trends"] = []
-            self._logs["context_phases"] = []
+            self._logs["context_buckets"] = []
 
     def on_step_start(self, global_step: int) -> CandidateConfig:
         """Return the active structured config, selecting it only at episode start."""
@@ -184,7 +175,7 @@ class StructuredEpisodeManager:
         if global_step < 0:
             raise ValueError("global_step must be non-negative.")
         if self._active_episode is None:
-            selection = self._select_config(global_step)
+            selection = self._select_config()
             self._active_episode = _ActiveStructuredEpisode(
                 episode_index=self._next_episode_index,
                 selection=selection,
@@ -287,24 +278,21 @@ class StructuredEpisodeManager:
         self._logs["reward_final_clipped"].append(summary.reward_final_clipped)
         self._logs["mean_update_norms"].append(summary.mean_update_norm)
         if self._context_mode != "none":
-            self._logs["context_bucket_ids"].append(selection.context_bucket_id)
-            self._logs["context_bucket_names"].append(selection.context_bucket_name)
-            self._logs["context_trends"].append(selection.context_trend)
-            self._logs["context_phases"].append(selection.context_phase)
+            self._logs["context_buckets"].append(selection.context_bucket)
 
-    def _select_config(self, global_step: int) -> StructuredSelection:
-        bucket_id, bucket_name, trend, phase = self._resolve_context(global_step)
+    def _select_config(self) -> StructuredSelection:
+        bucket = self._resolve_context()
         if self._lr_controller is None:
             lr_index = 0
         else:
-            _set_controller_context(self._lr_controller, bucket_id)
+            _set_controller_context(self._lr_controller, bucket)
             lr_index = self._lr_controller.select_mode()
             self._validate_index(lr_index, len(self._lr_candidates), "lr_controller")
         noise_controller = self._select_noise_controller(lr_index)
         if noise_controller is None:
             noise_index = 0
         else:
-            _set_controller_context(noise_controller, bucket_id)
+            _set_controller_context(noise_controller, bucket)
             noise_index = noise_controller.select_mode()
             self._validate_index(noise_index, len(self._noise_candidates), "noise_controller")
         lr_value = self._lr_candidates[lr_index]
@@ -315,25 +303,12 @@ class StructuredEpisodeManager:
             lr_value=lr_value,
             noise_value=noise_value,
             combined_name=build_generated_candidate_name(lr_value, noise_value),
-            context_bucket_id=bucket_id,
-            context_bucket_name=bucket_name,
-            context_trend=trend,
-            context_phase=phase,
+            context_bucket=bucket,
         )
 
-    def _resolve_context(
-        self, global_step: int
-    ) -> tuple[str | None, str | None, str | None, str | None]:
+    def _resolve_context(self) -> str | None:
         if self._context_mode == "none":
-            return None, None, None, None
-        trend = self._resolve_context_trend()
-        if self._context_mode == "trend":
-            return trend, trend, trend, None
-        phase = self._resolve_context_phase(global_step)
-        bucket_name = f"{phase}_{trend}"
-        return bucket_name, bucket_name, trend, phase
-
-    def _resolve_context_trend(self) -> str:
+            return None
         window_losses = self._episode_end_loss_history[-self._context_trend_window :]
         if len(window_losses) < 2:
             return "stable"
@@ -343,17 +318,6 @@ class StructuredEpisodeManager:
         if mean_delta > self._context_trend_epsilon:
             return "worsening"
         return "stable"
-
-    def _resolve_context_phase(self, global_step: int) -> str:
-        total_training_steps = self._total_training_steps
-        if total_training_steps is None or total_training_steps <= 0:
-            return "early"
-        progress = min(max(global_step / total_training_steps, 0.0), 1.0)
-        if progress < (1.0 / 3.0):
-            return "early"
-        if progress < (2.0 / 3.0):
-            return "middle"
-        return "late"
 
     def _select_noise_controller(self, lr_index: int) -> BaseController | None:
         if self._noise_controller is None:

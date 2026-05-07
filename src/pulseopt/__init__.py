@@ -1,10 +1,9 @@
 """Adaptive Episodic Exploration Scheduling package."""
 
-__version__ = "0.1.6rc1"
+__version__ = "0.2.0"
 
 from pulseopt.controller import (
     TREND_CONTEXT_BUCKETS,
-    TREND_PHASE_CONTEXT_BUCKETS,
     BaseController,
     BucketedContextualController,
     DiscountedUCBController,
@@ -35,7 +34,6 @@ __all__ = [
     "DiscountedUCBController",
     "RandomController",
     "TREND_CONTEXT_BUCKETS",
-    "TREND_PHASE_CONTEXT_BUCKETS",
     # Reward
     "BaseReward",
     "NormalizedLossImprovementReward",

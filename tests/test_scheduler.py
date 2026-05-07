@@ -148,24 +148,7 @@ class TestAEESContextModes:
         _run_steps(aees, model, optimizer, 20)
         aees.finalize()
         logs = aees.get_logs()
-        assert "context_bucket_ids" in logs
-
-    def test_trend_phase_context_mode(self):
-        model, optimizer = _make_model_and_optimizer()
-        aees = AEES(
-            optimizer,
-            lr_candidates=[0.5, 1.0],
-            noise_candidates=[0.0],
-            episode_length=4,
-            context_mode="trend_phase",
-            total_training_steps=40,
-            seed=0,
-        )
-        _run_steps(aees, model, optimizer, 20)
-        aees.finalize()
-        logs = aees.get_logs()
-        assert "context_bucket_ids" in logs
-
+        assert "context_buckets" in logs
 
 class TestAEESConditionalMode:
     def test_conditional_structured_control(self):
@@ -240,18 +223,6 @@ class TestAEESGuards:
         with pytest.raises(ValueError, match="context_mode"):
             AEES(optimizer, lr_candidates=[1.0], noise_candidates=[0.0], context_mode="invalid")
 
-    def test_trend_phase_without_total_steps_raises(self):
-        _, optimizer = _make_model_and_optimizer()
-        with pytest.raises(ValueError):
-            AEES(
-                optimizer,
-                lr_candidates=[0.5, 1.0],
-                noise_candidates=[0.0],
-                context_mode="trend_phase",
-                total_training_steps=None,
-            )
-
-
 class TestAEESInputValidation:
     @pytest.mark.parametrize(
         "lr_candidates",
@@ -280,19 +251,6 @@ class TestAEESInputValidation:
                 noise_candidates=[0.0],
                 episode_length=0,
             )
-
-    def test_total_training_steps_outside_trend_phase_warns(self):
-        _, optimizer = _make_model_and_optimizer()
-        with pytest.warns(UserWarning, match="total_training_steps"):
-            AEES(
-                optimizer,
-                lr_candidates=[1.0],
-                noise_candidates=[0.0],
-                episode_length=5,
-                context_mode="trend",
-                total_training_steps=100,
-            )
-
 
 class TestAEESCurrentCandidate:
     def test_current_candidate_lifecycle(self):

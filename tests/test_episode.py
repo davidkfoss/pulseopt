@@ -224,40 +224,9 @@ def test_trend_context_is_shared_across_independent_controllers() -> None:
         manager.on_step_end(loss=loss)
 
     logs = manager.get_logs()
-    assert logs["context_trends"] == ["stable", "stable", "improving"]
-    assert logs["context_phases"] == [None, None, None]
+    assert logs["context_buckets"] == ["stable", "stable", "improving"]
     assert lr_controller.contexts == ["stable", "stable", "improving"]
     assert noise_controller.contexts == ["stable", "stable", "improving"]
-
-
-def test_trend_phase_context_logs_phase_buckets() -> None:
-    """Trend-phase context should combine progress phase with the shared trend bucket."""
-
-    manager = StructuredEpisodeManager(
-        lr_candidates=[1.0, 1.2],
-        noise_candidates=[0.0, 0.05],
-        lr_controller=ContextAwareStubController([0, 0, 0]),
-        noise_controller=ContextAwareStubController([0, 0, 0]),
-        reward_fn=build_reward(),
-        episode_length=1,
-        structured_control_mode="independent",
-        context_mode="trend_phase",
-        total_training_steps=3,
-        context_trend_window=2,
-        context_trend_epsilon=0.1,
-    )
-
-    for step, loss in enumerate([5.0, 4.0, 4.5]):
-        manager.on_step_start(global_step=step)
-        manager.on_step_end(loss=loss)
-
-    logs = manager.get_logs()
-    assert logs["context_phases"] == ["early", "middle", "late"]
-    assert logs["context_bucket_names"] == [
-        "early_stable",
-        "middle_stable",
-        "late_improving",
-    ]
 
 
 def test_finalize_closes_partial_structured_episode_safely() -> None:

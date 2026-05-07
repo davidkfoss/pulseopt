@@ -7,18 +7,6 @@ import random
 from typing import Protocol
 
 TREND_CONTEXT_BUCKETS = ["improving", "stable", "worsening"]
-TREND_PHASE_CONTEXT_BUCKETS = [
-    "early_improving",
-    "early_stable",
-    "early_worsening",
-    "middle_improving",
-    "middle_stable",
-    "middle_worsening",
-    "late_improving",
-    "late_stable",
-    "late_worsening",
-]
-PHASE_TREND_CONTEXT_BUCKETS = list(TREND_PHASE_CONTEXT_BUCKETS)
 
 
 class BaseController(Protocol):

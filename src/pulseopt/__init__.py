@@ -1,6 +1,6 @@
 """Adaptive Episodic Exploration Scheduling package."""
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 from pulseopt.controller import (
     TREND_CONTEXT_BUCKETS,

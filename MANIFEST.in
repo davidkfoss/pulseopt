@@ -1,0 +1,25 @@
+# Include repository examples in the source distribution
+recursive-include examples *.py
+
+# Exclude development and environment files
+exclude uv.lock
+exclude .python-version
+exclude .gitignore
+exclude .env
+exclude .env.*
+exclude .DS_Store
+
+# Exclude local/build artifacts
+prune .venv
+prune dist
+prune build
+prune *.egg-info
+prune .pytest_cache
+prune .ruff_cache
+prune .mypy_cache
+prune .coverage
+prune htmlcov
+
+# Exclude repository/CI metadata from the source distribution
+prune .git
+prune .github

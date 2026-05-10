@@ -61,16 +61,16 @@ Axes with a single candidate are treated as fixed constants and get no controlle
 
 ## Common knobs
 
-| Argument                    | Meaning                                                                                             |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `lr_candidates`             | Multipliers tried against the optimizer's base LR.                                                  |
-| `noise_candidates`          | Gradient-noise std values; `0.0` means no noise.                                                    |
-| `episode_length`            | Steps per episode; reward is computed at episode end.                                               |
-| `lr_scheduler`              | Optional `torch.optim.lr_scheduler.*` instance; `step()` is called for you.                         |
-| `structured_control_mode`   | `"independent"` (default) or `"conditional"` (one noise controller per LR arm).                     |
-| `context_mode`              | `"none"` (default) or `"trend"`.                                                                    |
-| `reward_instability_lambda` | Weight on the variance penalty in the reward.                                                       |
-| `seed`                      | Seeds controllers and gradient-noise generators.                                                    |
+| Argument                    | Meaning                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `lr_candidates`             | Multipliers tried against the optimizer's base LR.                              |
+| `noise_candidates`          | Gradient-noise std values; `0.0` means no noise.                                |
+| `episode_length`            | Steps per episode; reward is computed at episode end.                           |
+| `lr_scheduler`              | Optional `torch.optim.lr_scheduler.*` instance; `step()` is called for you.     |
+| `structured_control_mode`   | `"independent"` (default) or `"conditional"` (one noise controller per LR arm). |
+| `context_mode`              | `"none"` (default) or `"trend"`.                                                |
+| `reward_instability_lambda` | Weight on the variance penalty in the reward.                                   |
+| `seed`                      | Seeds controllers and gradient-noise generators.                                |
 
 `AEES.step_end(loss)` raises `ValueError` on a non-finite loss. If you train with mixed precision (`torch.cuda.amp` / `torch.amp`) and expect occasional NaN/Inf during loss-scaling backoff, guard the call yourself or skip the step.
 
@@ -82,14 +82,18 @@ Axes with a single candidate are treated as fixed constants and get no controlle
 
 ## Runnable examples
 
-End-to-end demos that use only the public `pulseopt` API (`from pulseopt import AEES`) on real datasets. Each script is short, self-contained, and runs against a `pip install pulseopt`-only environment — no helpers from this repository are imported. Each writes a per-epoch text log to the path given by `--output`.
+End-to-end demos that use only the public `pulseopt` API (`from pulseopt import AEES`) on real datasets. The examples are included in the source distribution published to PyPI and are also available in the GitHub repository. They are written to run against a normal `pip install pulseopt` environment — no internal helpers from this repository are imported.
+
+Each script is short, self-contained, and writes a per-epoch text log to the path given by `--output`.
 
 - [`examples/task_cifar100.py`](https://github.com/davidkfoss/pulseopt/blob/main/examples/task_cifar100.py) — ResNet-18 on CIFAR-100. Picks AdamW or SGD via `--optimizer`. Needs `torch`, `torchvision`.
 - [`examples/task_sst2.py`](https://github.com/davidkfoss/pulseopt/blob/main/examples/task_sst2.py) — DistilBERT on GLUE SST-2. AdamW. Needs `torch`, `transformers`, `datasets`.
 - [`examples/task_agnews.py`](https://github.com/davidkfoss/pulseopt/blob/main/examples/task_agnews.py) — DistilBERT on AG News. AdamW. Needs `torch`, `transformers`, `datasets`.
 
 ```bash
-pip install pulseopt torch torchvision
+git clone https://github.com/davidkfoss/pulseopt.git
+cd pulseopt
+pip install "pulseopt[examples]"
 python examples/task_cifar100.py --epochs 10 --output cifar100.log
 ```
 
@@ -98,7 +102,7 @@ These are the recommended starting point if you want to see how AEES plugs into 
 ## Repo layout
 
 - [`src/pulseopt/`](https://github.com/davidkfoss/pulseopt/tree/main/src/pulseopt) — published library: controllers, episode manager, reward, optimizer wrappers, and the `AEES` high-level API.
-- [`examples/`](https://github.com/davidkfoss/pulseopt/tree/main/examples) — short, self-contained PyPI-side demos using the public `AEES` API.
+- [`examples/`](https://github.com/davidkfoss/pulseopt/tree/main/examples) — short, self-contained demos using only the public `AEES` API. Included in the PyPI source distribution, but not installed as part of the wheel.
 - [`tests/`](https://github.com/davidkfoss/pulseopt/tree/main/tests) — regression and unit tests.
 
 ## Development

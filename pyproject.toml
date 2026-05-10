@@ -31,8 +31,15 @@ classifiers = [
 dependencies = ["torch>=2.0"]
 
 [project.optional-dependencies]
-examples = ["torchvision>=0.22", "transformers>=4.52", "datasets>=3.6"]
-dev = ["pytest>=8,<9", "ruff>=0.6"]
+examples = [
+    "torchvision>=0.22",
+    "transformers>=4.52",
+    "datasets>=3.6",
+]
+dev = [
+    "pytest>=9,<10",
+    "ruff>=0.6",
+]
 
 [project.urls]
 Homepage = "https://github.com/davidkfoss/pulseopt"
@@ -41,7 +48,6 @@ Issues = "https://github.com/davidkfoss/pulseopt/issues"
 Changelog = "https://github.com/davidkfoss/pulseopt/releases"
 
 [tool.setuptools]
-package-dir = { "" = "src" }
 include-package-data = true
 
 [tool.setuptools.dynamic]
@@ -53,9 +59,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 pulseopt = ["py.typed"]
 
-[tool.pytest.ini_options]
+[tool.pytest]
+minversion = "9.0"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100

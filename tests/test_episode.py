@@ -224,10 +224,7 @@ def test_trend_context_is_shared_across_independent_controllers() -> None:
         manager.on_step_end(loss=loss)
 
     logs = manager.get_logs()
-    assert logs["context_bucket_ids"] == ["stable", "stable", "improving"]
-    assert logs["context_bucket_names"] == ["stable", "stable", "improving"]
-    assert logs["context_trends"] == ["stable", "stable", "improving"]
-
+    assert logs["context_buckets"] == ["stable", "stable", "improving"]
     assert lr_controller.contexts == ["stable", "stable", "improving"]
     assert noise_controller.contexts == ["stable", "stable", "improving"]
 
@@ -278,7 +275,8 @@ def test_episode_ema_endpoints_are_logged_and_used_for_log_reward() -> None:
     logs = manager.get_logs()
     assert logs["episode_ema_loss_starts"] == [10.0]
     assert logs["episode_ema_loss_ends"] == [8.0]
-    assert logs["episode_rewards"][0] == pytest.approx(math.log(10.0 + 1e-8) - math.log(8.0 + 1e-8))
+    assert logs["episode_rewards"][0] == pytest.approx(
+        math.log(10.0 + 1e-8) - math.log(8.0 + 1e-8))
 
 
 def test_invalid_episode_length_raises_clear_error() -> None:

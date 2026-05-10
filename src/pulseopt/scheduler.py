@@ -191,7 +191,8 @@ class AEES:
         if not self._step_started:
             raise RuntimeError("step_end() called without a preceding step_start().")
         candidate = self._current_candidate
-        assert candidate is not None
+        if candidate is None:
+            raise AssertionError
 
         float_loss = float(loss.item()) if isinstance(loss, Tensor) else float(loss)
         if not math.isfinite(float_loss):

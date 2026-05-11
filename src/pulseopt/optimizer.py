@@ -1,7 +1,14 @@
-"""Scheduler-compatible optimizer wrappers with AEES mode scaling."""
+"""Scheduler-compatible optimizer wrappers with AEES mode scaling.
+
+.. deprecated:: 0.3.0
+    ``AdaptiveModeAdamW`` and ``AdaptiveModeSGD`` are deprecated and will be
+    removed in 0.4.0. Use :class:`pulseopt.AEES`, which wraps any
+    ``torch.optim.Optimizer``.
+"""
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any
@@ -11,9 +18,18 @@ from torch import Tensor
 
 from pulseopt.types import CandidateConfig
 
+_DEPRECATION_MESSAGE = (
+    "{cls} is deprecated and will be removed in pulseopt 0.4.0. "
+    "Use pulseopt.AEES, which wraps any torch.optim.Optimizer."
+)
+
 
 class AdaptiveModeAdamW(torch.optim.AdamW):
-    """AdamW optimizer that applies AEES multipliers on top of scheduled bases."""
+    """AdamW optimizer that applies AEES multipliers on top of scheduled bases.
+
+    .. deprecated:: 0.3.0
+        Use :class:`pulseopt.AEES` instead. Will be removed in 0.4.0.
+    """
 
     def __init__(
         self,
@@ -26,6 +42,11 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
         mode: CandidateConfig | None = None,
         noise_seed: int | None = None,
     ) -> None:
+        warnings.warn(
+            _DEPRECATION_MESSAGE.format(cls="AdaptiveModeAdamW"),
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if not torch.isfinite(torch.tensor(float(lr))):
             raise ValueError("lr must be finite.")
         if lr <= 0.0:
@@ -269,7 +290,11 @@ class AdaptiveModeAdamW(torch.optim.AdamW):
 
 
 class AdaptiveModeSGD(torch.optim.SGD):
-    """SGD optimizer that applies AEES multipliers on top of scheduled bases."""
+    """SGD optimizer that applies AEES multipliers on top of scheduled bases.
+
+    .. deprecated:: 0.3.0
+        Use :class:`pulseopt.AEES` instead. Will be removed in 0.4.0.
+    """
 
     def __init__(
         self,
@@ -282,6 +307,11 @@ class AdaptiveModeSGD(torch.optim.SGD):
         mode: CandidateConfig | None = None,
         noise_seed: int | None = None,
     ) -> None:
+        warnings.warn(
+            _DEPRECATION_MESSAGE.format(cls="AdaptiveModeSGD"),
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if not torch.isfinite(torch.tensor(float(lr))):
             raise ValueError("lr must be finite.")
         if lr <= 0.0:

@@ -45,7 +45,7 @@ dev = [
 Homepage = "https://github.com/davidkfoss/pulseopt"
 Repository = "https://github.com/davidkfoss/pulseopt"
 Issues = "https://github.com/davidkfoss/pulseopt/issues"
-Changelog = "https://github.com/davidkfoss/pulseopt/releases"
+Changelog = "https://github.com/davidkfoss/pulseopt/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 include-package-data = true

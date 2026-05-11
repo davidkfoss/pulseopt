@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import pytest
 import torch
 
 from pulseopt.optimizer import AdaptiveModeAdamW
 from pulseopt.types import CandidateConfig
+
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:AdaptiveModeAdamW is deprecated:DeprecationWarning"
+)
 
 
 def build_model(weight: float = 1.0) -> torch.nn.Linear:
